@@ -1,0 +1,43 @@
+workflows:
+  tatami-day-ios:
+    name: Tatami Day iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: tatami-day
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.idan.shoshany.tatamiday
+      vars:
+        XCODE_PROJECT: TatamiDay.xcodeproj
+        XCODE_SCHEME: TatamiDay
+      xcode: latest
+    scripts:
+      - name: Set build number
+        script: |
+          cd "$CM_BUILD_DIR"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*/CURRENT_PROJECT_VERSION = $PROJECT_BUILD_NUMBER/" TatamiDay.xcodeproj/project.pbxproj
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles \
+            --custom-export-options='{"testFlightInternalTestingOnly": true}'
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - idan.shoshany.2011@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false
