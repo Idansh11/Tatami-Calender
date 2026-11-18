@@ -20,8 +20,7 @@ workflows:
           sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*/CURRENT_PROJECT_VERSION = $PROJECT_BUILD_NUMBER/" TatamiDay.xcodeproj/project.pbxproj
       - name: Set up code signing
         script: |
-          xcode-project use-profiles \
-            --custom-export-options='{"testFlightInternalTestingOnly": true}'
+          xcode-project use-profiles
       - name: Build IPA
         script: |
           xcode-project build-ipa \
